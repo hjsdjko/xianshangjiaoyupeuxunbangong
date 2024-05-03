@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.KaihuitongzhiDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.kaihuitongzhi_name as kaihuitongzhiName
+        ,a.kaihuitongzhi_types as kaihuitongzhiTypes
+        ,a.kaihuitongzhi_content as kaihuitongzhiContent
+        ,a.kaihuitongzhi_delete as kaihuitongzhiDelete
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.KaihuitongzhiView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+
+        FROM kaihuitongzhi  a
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.kaihuitongzhiName != '' and params.kaihuitongzhiName != null and params.kaihuitongzhiName != 'null' ">
+                and a.kaihuitongzhi_name like CONCAT('%',#{params.kaihuitongzhiName},'%')
+            </if>
+            <if test="params.kaihuitongzhiTypes != null and params.kaihuitongzhiTypes != ''">
+                and a.kaihuitongzhi_types = #{params.kaihuitongzhiTypes}
+            </if>
+            <if test=" params.kaihuitongzhiContent != '' and params.kaihuitongzhiContent != null and params.kaihuitongzhiContent != 'null' ">
+                and a.kaihuitongzhi_content like CONCAT('%',#{params.kaihuitongzhiContent},'%')
+            </if>
+            <if test="params.kaihuitongzhiDeleteStart != null and params.kaihuitongzhiDeleteStart != ''">
+                <![CDATA[  and a.kaihuitongzhi_delete >= #{params.kaihuitongzhiDeleteStart}   ]]>
+            </if>
+            <if test="params.kaihuitongzhiDeleteEnd != null and params.kaihuitongzhiDeleteEnd != ''">
+                <![CDATA[  and a.kaihuitongzhi_delete <= #{params.kaihuitongzhiDeleteEnd}   ]]>
+            </if>
+             <if test="params.kaihuitongzhiDelete != null and params.kaihuitongzhiDelete != ''">
+                and a.kaihuitongzhi_delete = #{params.kaihuitongzhiDelete}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

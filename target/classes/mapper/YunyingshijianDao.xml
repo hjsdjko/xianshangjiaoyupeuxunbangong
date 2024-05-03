@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.YunyingshijianDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.yunyingshijian_name as yunyingshijianName
+        ,a.yunyingshijian_types as yunyingshijianTypes
+        ,a.yunyingshijian_content as yunyingshijianContent
+        ,a.yunyingshijian_delete as yunyingshijianDelete
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.YunyingshijianView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+
+        FROM yunyingshijian  a
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.yunyingshijianName != '' and params.yunyingshijianName != null and params.yunyingshijianName != 'null' ">
+                and a.yunyingshijian_name like CONCAT('%',#{params.yunyingshijianName},'%')
+            </if>
+            <if test="params.yunyingshijianTypes != null and params.yunyingshijianTypes != ''">
+                and a.yunyingshijian_types = #{params.yunyingshijianTypes}
+            </if>
+            <if test=" params.yunyingshijianContent != '' and params.yunyingshijianContent != null and params.yunyingshijianContent != 'null' ">
+                and a.yunyingshijian_content like CONCAT('%',#{params.yunyingshijianContent},'%')
+            </if>
+            <if test="params.yunyingshijianDeleteStart != null and params.yunyingshijianDeleteStart != ''">
+                <![CDATA[  and a.yunyingshijian_delete >= #{params.yunyingshijianDeleteStart}   ]]>
+            </if>
+            <if test="params.yunyingshijianDeleteEnd != null and params.yunyingshijianDeleteEnd != ''">
+                <![CDATA[  and a.yunyingshijian_delete <= #{params.yunyingshijianDeleteEnd}   ]]>
+            </if>
+             <if test="params.yunyingshijianDelete != null and params.yunyingshijianDelete != ''">
+                and a.yunyingshijian_delete = #{params.yunyingshijianDelete}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
